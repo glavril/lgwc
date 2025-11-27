@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: cms_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cms_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./code/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cms_network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: cms_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - cms_network
+
+  # FastAPI后端
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cms_api
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/cms_db
+      DATABASE_ASYNC_URL: postgresql+asyncpg://postgres:password@postgres:5432/cms_db
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: your-secret-key-change-in-production
+      DEBUG: "True"
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - cms_network
+
+  # 管理后台前端
+  admin:
+    build:
+      context: ./frontend/admin
+      dockerfile: Dockerfile
+    container_name: cms_admin
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - cms_network
+
+  # 博客展示前端
+  blog:
+    build:
+      context: ./frontend/blog
+      dockerfile: Dockerfile
+    container_name: cms_blog
+    ports:
+      - "3001:80"
+    depends_on:
+      - api
+    networks:
+      - cms_network
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: cms_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - cms_network
+
+volumes:
+  postgres_data:
+
+networks:
+  cms_network:
+    driver: bridge
