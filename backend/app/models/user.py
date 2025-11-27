@@ -30,7 +30,7 @@ class User(Base):
     locked_until = Column(TIMESTAMP(timezone=True))
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
-    metadata = Column(JSONB, default={})
+    meta_data = Column("metadata", JSONB, default={})
 
 
 class Role(Base):

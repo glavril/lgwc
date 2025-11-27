@@ -18,7 +18,7 @@ class MediaCreate(BaseModel):
     alt_text: Optional[str] = None
     caption: Optional[str] = None
     description: Optional[str] = None
-    metadata: Dict[str, Any] = {}
+    meta_data: Dict[str, Any] = Field(default={}, serialization_alias="metadata", validation_alias="metadata")
 
 
 # 媒体更新
@@ -27,7 +27,7 @@ class MediaUpdate(BaseModel):
     caption: Optional[str] = None
     description: Optional[str] = None
     status: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = Field(default=None, serialization_alias="metadata", validation_alias="metadata")
 
 
 # 媒体响应
@@ -49,7 +49,7 @@ class MediaResponse(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
-    metadata: Dict[str, Any]
+    meta_data: Dict[str, Any] = Field(serialization_alias="metadata", validation_alias="metadata")
     
     class Config:
         from_attributes = True

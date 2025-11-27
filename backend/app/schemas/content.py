@@ -20,7 +20,7 @@ class ContentCreate(BaseModel):
     meta_description: Optional[str] = None
     meta_keywords: Optional[List[str]] = []
     scheduled_for: Optional[datetime] = None
-    metadata: Dict[str, Any] = {}
+    meta_data: Dict[str, Any] = Field(default={}, serialization_alias="metadata", validation_alias="metadata")
 
 
 # 内容更新
@@ -38,7 +38,7 @@ class ContentUpdate(BaseModel):
     meta_description: Optional[str] = None
     meta_keywords: Optional[List[str]] = None
     scheduled_for: Optional[datetime] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = Field(default=None, serialization_alias="metadata", validation_alias="metadata")
 
 
 # 内容响应
@@ -66,7 +66,7 @@ class ContentResponse(BaseModel):
     comment_count: int
     created_at: datetime
     updated_at: datetime
-    metadata: Dict[str, Any]
+    meta_data: Dict[str, Any] = Field(serialization_alias="metadata", validation_alias="metadata")
     
     class Config:
         from_attributes = True

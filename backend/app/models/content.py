@@ -46,7 +46,7 @@ class Content(Base):
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
     
     # 扩展数据
-    metadata = Column(JSONB, default={})
+    meta_data = Column("metadata", JSONB, default={})
 
 
 class Taxonomy(Base):

@@ -21,10 +21,10 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <ConfigProvider locale={zhCN}>
-      <BrowserRouter>
+      <BrowserRouter basename="/admin">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          
+
           <Route path="/" element={
             <PrivateRoute>
               <MainLayout />
